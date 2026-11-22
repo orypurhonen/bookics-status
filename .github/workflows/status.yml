@@ -35,7 +35,7 @@ jobs:
         env:
           STATUSPAGE_API_KEY: ${{ secrets.STATUSPAGE_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          ALERT_TO: delivered@resend.dev
+          ALERT_TO: ${{ secrets.ALERT_TO }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: python3 scripts/check.py
 
