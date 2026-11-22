@@ -37,7 +37,7 @@ COMPONENTS = {
 
 # name, url, text that must appear in the body, component key
 CHECKS = [
-    ("Home page", "https://bookics.com.au/", "<title>Bookics", "website"),
+    ("Home page", "https://bookics.com.au/status-check-test-404/", "<title>Bookics", "website"),
     ("Demo booking page", "https://bookics.com.au/book/bookics-demo/", "<title>Book a table", "website"),
     ("Booking widget script", "https://bookics.com.au/embed.js", "currentScript", "website"),
     ("Staff app sign-in", "https://bookics.com.au/app/login", "<title>Sign in | Bookics", "app"),
