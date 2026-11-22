@@ -1,0 +1,55 @@
+name: Bookics status checks
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: status-checks
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      STATUSPAGE_PAGE_ID: k3frcq2dvhsj
+      COMPONENT_WEBSITE: 1snyw5rgxdw5
+      COMPONENT_APP: hfvp765yw22s
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore last run's state
+        uses: actions/cache/restore@v4
+        with:
+          path: state
+          key: status-state-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: status-state-
+
+      - name: Check Bookics and update the status page
+        env:
+          STATUSPAGE_API_KEY: ${{ secrets.STATUSPAGE_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_TO: ${{ secrets.ALERT_TO }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 scripts/check.py
+
+      - name: Save state for the next run
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state
+          key: status-state-${{ github.run_id }}-${{ github.run_attempt }}
+
+      # GitHub switches off schedules in a repo with no activity for 60 days.
+      # Re-enabling the workflow on each run keeps the schedule alive.
+      - name: Keep the schedule enabled
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/status.yml/enable" || echo "could not re-enable (non-fatal)"
